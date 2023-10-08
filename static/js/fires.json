@@ -1,0 +1,38 @@
+[
+    {
+        "description": "fgchn",
+        "roadBlocked": "true",
+        "radius": "499",
+        "lat": "42.67145571278828",
+        "lng": "23.29479217529297",
+        "house": "on",
+        "time": "1596560150494"
+    },
+    {
+        "description": "fire in hladilnika",
+        "roadBlocked": "true",
+        "radius": "678",
+        "lat": "42.653656930109754",
+        "lng": "23.316078186035156",
+        "house": "on",
+        "time": "1696760767758"
+    },
+    {
+        "description": "fire in krasno selo",
+        "roadBlocked": "true",
+        "radius": "200",
+        "lat": "42.67432702479156",
+        "lng": "23.284792900085453",
+        "house": "on",
+        "time": "1696762062399"
+    },
+    {
+        "description": "vitosha fires",
+        "roadBlocked": "false",
+        "radius": "800",
+        "lat": "42.62334941229699",
+        "lng": "23.245010375976566",
+        "forest": "on",
+        "time": "1696762138546"
+    }
+]

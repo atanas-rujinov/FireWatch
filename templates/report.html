@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<form action="/report" method="POST" id="Form">
+    <label for="desc">Brief description of the fire:</label>
+    <input type="text" id="desc" name="description" placeholder="Description">
+    <br>
+    <label for="roadBlocked">Is the road/roads blocked?</label>
+    <select id="roadBlocked" name="roadBlocked">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+        <option value="">I don't know</option>
+    </select>
+    <br>
+    <label for="radius">Radius of the fire (in meters):</label>
+    <input type="number" id="radius" name="radius" placeholder="Radius" required>
+    <br>
+    <div id="map" style="height: 400px; width: 400px;"></div>
+    <br>
+    <input type="text" id="lat" name="lat" required>
+    <input type="text" id="lng" name="lng" required>
+    <br>
+    <p>What's burning?</p>
+    <label for="house">House/s</label>
+    <input type="checkbox" id="houses" name="house">
+    <br>
+    <label for="fields">Fields</label>
+    <input type="checkbox" id="fields" name="fields">
+    <br>
+    <label for="forest">Forest</label>
+    <input type="checkbox" id="forest" name="forest">
+    <br>
+    <label for="time">Time of the fire:</label>
+    <input type="text" id="time" name="time">
+    <br>
+    <button type="submit">Submit</button>
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        document.getElementById("time").value = Date.now();
+
+        var markersCount = 0;
+
+        function onMapClick(e) {
+            if (markersCount == 0 && document.getElementById("radius").value > 0) {
+                document.getElementById("lat").value = Number(e.latlng.lat);
+                document.getElementById("lng").value = Number(e.latlng.lng);
+
+                // Create a marker and a circle
+                var marker = L.marker([e.latlng.lat, e.latlng.lng], { draggable: true });
+                var circle = L.circle([e.latlng.lat, e.latlng.lng], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: 0.5,
+                    radius: document.getElementById("radius").value,
+                });
+
+                // Create a layer group and add the marker and circle to it
+                var group = L.layerGroup([marker, circle]).addTo(map);
+
+                // Increment markersCount
+                markersCount++;
+
+                // Handle marker dragend event
+                marker.on('dragend', function (e) {
+                    // Update the circle's position when the marker is dragged
+                    circle.setLatLng(e.target.getLatLng());
+                    // Update radius
+                    circle.setRadius(document.getElementById("radius").value);
+                    // Update lat and lng
+                    document.getElementById("lat").value = Number(e.target.getLatLng().lat);
+                    document.getElementById("lng").value = Number(e.target.getLatLng().lng);
+                });
+            }
+        }
+
+        map.on('click', onMapClick);
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0,
+        };
+
+        function success(pos) {
+            const crd = pos.coords;
+
+            console.log("Your current position is:");
+            console.log(`Latitude : ${crd.latitude}`);
+            console.log(`Longitude: ${crd.longitude}`);
+            console.log(`More or less ${crd.accuracy} meters.`);
+            if (crd.accuracy > 20) {
+                alert("WARNING: Your location accuracy is low. Please check your location settings.");
+            }
+            latitude = crd.latitude;
+            longitude = crd.longitude;
+            console.log(latitude);
+            console.log(longitude);
+            map.panTo(new L.LatLng(latitude, longitude));
+            var marker = L.marker([latitude, longitude]).addTo(map);
+            marker.bindPopup("YOU").openPopup();
+        }
+
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+
+        navigator.geolocation.getCurrentPosition(success, error, options);
+
+        console.log(latitude);
+
+        var map = L.map('map').setView([latitude, longitude], 13);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+
+    </script>
+
+</form>
+
+</html>

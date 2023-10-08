@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+
+
+</head>
+
+<body>
+    <div id="map" style="height: 900px; width: 1800px; position: absolute;"></div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fires.json') }}"></script>
+
+    {% for data in data %}
+    <p class="letter" style="display: none;">{{ data }}</p>
+    {% endfor %}
+
+    <script>
+        var paragraphs = document.getElementsByClassName("letter");
+        var JSONString = "";
+        // Loop through the <p> elements and retrieve their text content
+        for (let i = 0; i < paragraphs.length; i++) {
+            if (paragraphs[i].textContent == `'`) paragraphs[i].textContent = `"`;
+            JSONString += paragraphs[i].textContent;
+        }
+        console.log(JSONString)
+        var JSONData = JSON.parse(JSONString);
+        console.log(JSONData)
+        for (let i = 0; i < JSONData.length; i++) {
+            console.log(JSONData[i].lat, JSONData[i].lng)
+
+            timeRN = Date.now();
+            timeDiff = timeRN - JSONData[i].time;
+            console.log("TIME DIFF" + timeDiff)
+            hoursDiff = Math.floor(timeDiff / 1000 / 60 / 60);
+            console.log("HOURS DIFF" + hoursDiff)
+            opacity = 0.7 - (hoursDiff * 0.02916);
+
+            if (hoursDiff < 24) {
+                var circle = L.circle([JSONData[i].lat, JSONData[i].lng], {
+                    color: 'red',
+                    fillColor: '#f03',
+                    fillOpacity: opacity,
+                    radius: JSONData[i].radius
+                }).addTo(map);
+                var popup = JSONData[i].description + "<br>";
+
+                if (JSONData[i].house == "on") popup += "Houses are burning";
+                if (JSONData[i].fields == "on") popup += "<br>Fields are burning";
+                if (JSONData[i].forest == "on") popup += "<br>Forest is burning";
+
+                if (JSONData[i].roadBlocked) {
+                    if (JSONData[i].roadBlocked == "true") popup += "<br>Roads are blocked";
+                    else if (JSONData[i].roadBlocked == "false") popup += "<br>Roads are not blocked";
+                }
+
+                if (JSONData[i].time) {
+                    let date = new Date(JSONData[i].time);
+                    console.log(date)
+                    popup += "<br>Reported " + hoursDiff + " hours ago";
+                }
+
+                circle.bindPopup(popup);
+            }
+        }
+
+
+
+
+    </script>
+    <button onclick="window.location.href = '/report';" style="margin-left: 1805px;">Report</button>
+</body>
+
+</html>
